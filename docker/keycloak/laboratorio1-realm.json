@@ -1,0 +1,75 @@
+{
+  "realm": "laboratorio1",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "accessTokenLifespan": 900,
+  "roles": {
+    "realm": [
+      {
+        "name": "SUPER-ADMIN-ROLE",
+        "description": "Puede consultar, crear, actualizar y eliminar productos y categorias"
+      },
+      {
+        "name": "USER",
+        "description": "Puede consultar productos y categorias"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "laboratorio1-api",
+      "name": "API Laboratorio 1",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:*",
+        "https://oauth.pstmn.io/v1/callback"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@laboratorio1.local",
+      "emailVerified": true,
+      "firstName": "Administrador",
+      "lastName": "Laboratorio",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "AdminLab123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "SUPER-ADMIN-ROLE"
+      ]
+    },
+    {
+      "username": "usuario",
+      "enabled": true,
+      "email": "usuario@laboratorio1.local",
+      "emailVerified": true,
+      "firstName": "Usuario",
+      "lastName": "Laboratorio",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "UsuarioLab123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "USER"
+      ]
+    }
+  ]
+}

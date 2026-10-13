@@ -1,0 +1,780 @@
+{
+  "info": {
+    "_postman_id": "dc56233e-30a0-4b81-ba27-72fec4ff6b64",
+    "name": "Laboratorio 1 - CRUD Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "token_usuario",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token_admin",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoria_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "producto_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Autenticacion",
+      "item": [
+        {
+          "name": "Obtener token admin",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8180/realms/laboratorio1/protocol/openid-connect/token",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "laboratorio1-api",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "AdminLab123!",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"token_admin\",",
+                  "        pm.response.json().access_token",
+                  "    );",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener token usuario",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8180/realms/laboratorio1/protocol/openid-connect/token",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "laboratorio1-api",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "UsuarioLab123!",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"token_usuario\",",
+                  "        pm.response.json().access_token",
+                  "    );",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Categorias",
+      "item": [
+        {
+          "name": "Crear categoría",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/categorias",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Electrónica\",\r\n  \"descripcion\": \"Dispositivos y accesorios electrónicos\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"categoria_id\",",
+                  "        pm.response.json().id",
+                  "    );",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/categorias",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar categoría por ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/categorias/{{categoria_id}}",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/categorias/{{categoria_id}}",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Electrónica actualizada\",\r\n  \"descripcion\": \"Equipos y accesorios electrónicos\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Productos",
+      "item": [
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/productos",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Teclado\",\r\n  \"descripcion\": \"Teclado USB\",\r\n  \"precio\": 15000.00,\r\n  \"cantidadStock\": 10,\r\n  \"categoriaId\": {{categoria_id}}\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"producto_id\", pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/productos",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar producto por ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/productos/{{producto_id}}",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/productos/{{producto_id}}",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Teclado actualizado\",\r\n  \"descripcion\": \"Teclado USB en oferta\",\r\n  \"precio\": 12500.00,\r\n  \"cantidadStock\": 20,\r\n  \"categoriaId\": {{categoria_id}}\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Permisos",
+      "item": [
+        {
+          "name": "USER - Crear categoría (403)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/categorias",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Prueba de permisos\",\r\n  \"descripcion\": \"Intento de creación con usuario normal\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario normal no puede crear categorías\", function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER - Actualizar categoría (403)",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/categorias/{{categoria_id}}",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Cambio no autorizado\",\r\n  \"descripcion\": \"Intento de actualización con usuario normal\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario normal no puede actualizar categorías\", function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER - Eliminar categoría (403)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/categorias/{{categoria_id}}",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario normal no puede eliminar categorías\", function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER - Crear producto (403)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/productos",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Producto no autorizado\",\r\n  \"descripcion\": \"Intento de creación con usuario normal\",\r\n  \"precio\": 5000.00,\r\n  \"cantidadStock\": 5,\r\n  \"categoriaId\": {{categoria_id}}\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario normal no puede crear productos\", function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER - Actualizar producto (403)",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/productos/{{producto_id}}",
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Cambio no autorizado\",\r\n  \"descripcion\": \"Intento de actualización con usuario normal\",\r\n  \"precio\": 5000.00,\r\n  \"cantidadStock\": 5,\r\n  \"categoriaId\": {{categoria_id}}\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario normal no puede actualizar productos\", function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER - Eliminar producto (403)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/productos/{{producto_id}}",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_usuario}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario normal no puede eliminar productos\", function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Borrado",
+      "item": [
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/productos/{{producto_id}}",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El administrador puede eliminar productos\", function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/categorias/{{categoria_id}}",
+            "description": "",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_admin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El administrador puede eliminar categorías\", function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 CORS",
+      "item": [
+        {
+          "name": "Comprobar CORS",
+          "request": {
+            "method": "OPTIONS",
+            "url": "http://localhost:8080/api/productos",
+            "description": "",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:4200",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "POST",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "authorization,content-type",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"CORS permite el origen, método y encabezados configurados\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "",
+                  "  pm.expect(",
+                  "    pm.response.headers.get(\"Access-Control-Allow-Origin\")",
+                  "  ).to.eql(\"http://localhost:4200\");",
+                  "",
+                  "  pm.expect(",
+                  "    pm.response.headers.get(\"Access-Control-Allow-Methods\") || \"\"",
+                  "  ).to.include(\"POST\");",
+                  "",
+                  "  const encabezados = (",
+                  "    pm.response.headers.get(\"Access-Control-Allow-Headers\") || \"\"",
+                  "  ).toLowerCase();",
+                  "",
+                  "  pm.expect(encabezados).to.include(\"authorization\");",
+                  "  pm.expect(encabezados).to.include(\"content-type\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
