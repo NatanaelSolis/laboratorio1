@@ -1,0 +1,536 @@
+# Pruebas locales. Ejecutar Run All Requests con Java y Docker iniciados.
+# Crea datos propios y conserva una cuenta de prueba para inspección.
+@base = http://localhost:8080/api
+
+### 01 - Consulta sin sesión
+< {%
+    for (let i = 1; i <= 27; i++) client.global.clear("labCheck" + i);
+    ["labAdmin", "labUser", "labNewToken", "labCatId", "labProdId"].forEach(k => client.global.clear(k));
+    client.global.set("labRun", Date.now() + "_" + Math.floor(Math.random() * 10000));
+    client.global.set("labNewUser", "prueba_" + client.global.get("labRun"));
+%}
+GET {{base}}/productos
+
+> {%
+    client.test("Consulta sin sesión", () => {
+        client.assert(response.status === 401, "Estado recibido: " + response.status);
+        client.global.set("labCheck1", "ok");
+    });
+%}
+
+### 02 - Login administrador
+POST {{base}}/v1/auth/login
+Content-Type: application/json
+
+{"username":"admin","password":"AdminLab123!"}
+
+> {%
+    client.test("Login administrador", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(!!response.body.access_token);
+        client.global.set("labAdmin", response.body.access_token);
+        client.global.set("labCheck2", "ok");
+    });
+%}
+
+### 03 - Login usuario
+POST {{base}}/v1/auth/login
+Content-Type: application/json
+
+{"username":"usuario","password":"UsuarioLab123!"}
+
+> {%
+    client.test("Login usuario", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(!!response.body.access_token);
+        client.global.set("labUser", response.body.access_token);
+        client.global.set("labCheck3", "ok");
+    });
+%}
+
+### 04 - Crear categoría
+POST {{base}}/categorias
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Categoria {{labRun}}","descripcion":"Categoria de prueba"}
+
+> {%
+    client.test("Crear categoría", () => {
+        client.assert(response.status === 201, "Estado recibido: " + response.status);
+        client.assert(Number.isSafeInteger(response.body.id) && response.body.id > 0);
+        client.global.set("labCatId", String(response.body.id));
+        client.global.set("labCheck4", "ok");
+    });
+%}
+
+### 05 - Crear producto
+POST {{base}}/productos
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Producto {{labRun}}","descripcion":"Producto de prueba","precio":1200.50,"cantidadStock":7,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Crear producto", () => {
+        client.assert(response.status === 201, "Estado recibido: " + response.status);
+        client.assert(Number.isSafeInteger(response.body.id) && response.body.id > 0);
+        client.assert(Number(response.body.categoriaId) === Number(client.global.get("labCatId")));
+        client.global.set("labProdId", String(response.body.id));
+        client.global.set("labCheck5", "ok");
+    });
+%}
+
+### 06 - USER consulta categoría
+GET {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labUser}}
+
+> {%
+    client.test("USER consulta categoría", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(response.body.nombre === "Categoria " + client.global.get("labRun"));
+        client.assert(response.body.descripcion === "Categoria de prueba");
+        client.global.set("labCheck6", "ok");
+    });
+%}
+
+### 07 - USER consulta producto
+GET {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labUser}}
+
+> {%
+    client.test("USER consulta producto", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(response.body.nombre === "Producto " + client.global.get("labRun"));
+        client.assert(response.body.descripcion === "Producto de prueba");
+        client.assert(Number(response.body.precio) === 1200.50 && response.body.cantidadStock === 7);
+        client.assert(Number(response.body.categoriaId) === Number(client.global.get("labCatId")));
+        client.global.set("labCheck7", "ok");
+    });
+%}
+
+### 08 - USER no puede POST categorias
+POST {{base}}/categorias
+Authorization: Bearer {{labUser}}
+Content-Type: application/json
+
+{"nombre":"Categoria {{labRun}}","descripcion":"Categoria de prueba"}
+
+> {%
+    client.test("USER no puede POST categorias", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck8", "ok");
+    });
+%}
+
+### 09 - USER no puede PUT categorias
+PUT {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labUser}}
+Content-Type: application/json
+
+{"nombre":"Categoria {{labRun}}","descripcion":"Categoria de prueba"}
+
+> {%
+    client.test("USER no puede PUT categorias", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck9", "ok");
+    });
+%}
+
+### 10 - USER no puede DELETE categorias
+DELETE {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labUser}}
+
+> {%
+    client.test("USER no puede DELETE categorias", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck10", "ok");
+    });
+%}
+
+### 11 - USER no puede POST productos
+POST {{base}}/productos
+Authorization: Bearer {{labUser}}
+Content-Type: application/json
+
+{"nombre":"Producto {{labRun}}","descripcion":"Producto de prueba","precio":1200.50,"cantidadStock":7,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("USER no puede POST productos", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck11", "ok");
+    });
+%}
+
+### 12 - USER no puede PUT productos
+PUT {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labUser}}
+Content-Type: application/json
+
+{"nombre":"Producto {{labRun}}","descripcion":"Producto de prueba","precio":1200.50,"cantidadStock":7,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("USER no puede PUT productos", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck12", "ok");
+    });
+%}
+
+### 13 - USER no puede DELETE productos
+DELETE {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labUser}}
+
+> {%
+    client.test("USER no puede DELETE productos", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck13", "ok");
+    });
+%}
+
+### 14 - USER no consulta usuarios
+GET {{base}}/usuarios
+Authorization: Bearer {{labUser}}
+
+> {%
+    client.test("USER no consulta usuarios", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck14", "ok");
+    });
+%}
+
+### 15 - Administrador consulta usuarios
+GET {{base}}/usuarios?first=0&max=100
+Authorization: Bearer {{labAdmin}}
+
+> {%
+    client.test("Administrador consulta usuarios", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(Array.isArray(response.body) && response.body.length > 0);
+        client.assert(response.body.every(u => !!u.id && !!u.username && !("password" in u) && !("credentials" in u)));
+        client.global.set("labCheck15", "ok");
+    });
+%}
+
+### 16 - Actualizar categoría
+PUT {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"id":{{labCatId}},"nombre":"Categoria editada {{labRun}}","descripcion":"Descripcion actualizada"}
+
+> {%
+    client.test("Actualizar categoría", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(response.body.nombre === "Categoria editada " + client.global.get("labRun"));
+        client.global.set("labCheck16", "ok");
+    });
+%}
+
+### 17 - Actualizar producto
+PUT {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"id":{{labProdId}},"nombre":"Producto editado {{labRun}}","descripcion":"Producto actualizado","precio":1500.75,"cantidadStock":11,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Actualizar producto", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(response.body.nombre === "Producto editado " + client.global.get("labRun"));
+        client.assert(Number(response.body.precio) === 1500.75 && response.body.cantidadStock === 11);
+        client.global.set("labCheck17", "ok");
+    });
+%}
+
+### 18 - Registro de usuario
+POST {{base}}/v1/auth/register
+Content-Type: application/json
+
+{"username":"{{labNewUser}}","email":"{{labNewUser}}@example.test","firstName":"Prueba","lastName":"Laboratorio","password":"PruebaLab123!"}
+
+> {%
+    client.test("Registro de usuario", () => {
+        client.assert(response.status === 201, "Estado recibido: " + response.status);
+        client.global.set("labCheck18", "ok");
+    });
+%}
+
+### 19 - Login de cuenta registrada
+POST {{base}}/v1/auth/login
+Content-Type: application/json
+
+{"username":"{{labNewUser}}","password":"PruebaLab123!"}
+
+> {%
+    client.test("Login de cuenta registrada", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(!!response.body.access_token);
+        client.global.set("labNewToken", response.body.access_token);
+        client.global.set("labCheck19", "ok");
+    });
+%}
+
+### 20 - Nueva cuenta lee categoría actualizada
+GET {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labNewToken}}
+
+> {%
+    client.test("Nueva cuenta lee categoría actualizada", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(response.body.nombre === "Categoria editada " + client.global.get("labRun"));
+        client.assert(response.body.descripcion === "Descripcion actualizada");
+        client.global.set("labCheck20", "ok");
+    });
+%}
+
+### 21 - Nueva cuenta lee producto actualizado
+GET {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labNewToken}}
+
+> {%
+    client.test("Nueva cuenta lee producto actualizado", () => {
+        client.assert(response.status === 200, "Estado recibido: " + response.status);
+        client.assert(response.body.nombre === "Producto editado " + client.global.get("labRun"));
+        client.assert(response.body.descripcion === "Producto actualizado");
+        client.assert(Number(response.body.precio) === 1500.75 && response.body.cantidadStock === 11);
+        client.assert(Number(response.body.categoriaId) === Number(client.global.get("labCatId")));
+        client.global.set("labCheck21", "ok");
+    });
+%}
+
+### 22 - Nueva cuenta no consulta usuarios
+GET {{base}}/usuarios
+Authorization: Bearer {{labNewToken}}
+
+> {%
+    client.test("Nueva cuenta no consulta usuarios", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck22", "ok");
+    });
+%}
+
+### 23 - Nueva cuenta no crea productos
+POST {{base}}/productos
+Authorization: Bearer {{labNewToken}}
+Content-Type: application/json
+
+{"nombre":"Producto {{labRun}}","descripcion":"Producto de prueba","precio":1200.50,"cantidadStock":7,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Nueva cuenta no crea productos", () => {
+        client.assert(response.status === 403, "Estado recibido: " + response.status);
+        client.global.set("labCheck23", "ok");
+    });
+%}
+
+### Categorías requieren sesión
+GET {{base}}/categorias
+
+> {%
+    client.test("Categorías sin sesión: 401", () => {
+        client.assert(response.status === 401);
+    });
+%}
+
+### Token inválido
+GET {{base}}/productos
+Authorization: Bearer invalido
+
+> {%
+    client.test("Token inválido: 401", () => {
+        client.assert(response.status === 401);
+    });
+%}
+
+### Contraseña incorrecta
+POST {{base}}/v1/auth/login
+Content-Type: application/json
+
+{"username":"usuario","password":"Incorrecta123!"}
+
+> {%
+    client.test("Contraseña incorrecta: 401", () => {
+        client.assert(response.status === 401);
+    });
+%}
+
+### Cuenta duplicada
+POST {{base}}/v1/auth/register
+Content-Type: application/json
+
+{"username":"{{labNewUser}}","email":"{{labNewUser}}@example.test","firstName":"Prueba","lastName":"Laboratorio","password":"PruebaLab123!"}
+
+> {%
+    client.test("Cuenta duplicada: 409", () => {
+        client.assert(response.status === 409);
+    });
+%}
+
+### Nombre de categoría vacío
+POST {{base}}/categorias
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"   ","descripcion":"Descripción válida"}
+
+> {%
+    client.test("Crear categoría inválida: 400", () => {
+        client.assert(response.status === 400);
+    });
+%}
+
+### Descripción de categoría vacía
+PUT {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Categoría válida","descripcion":""}
+
+> {%
+    client.test("Actualizar categoría inválida: 400", () => {
+        client.assert(response.status === 400);
+    });
+%}
+
+### Precio negativo
+POST {{base}}/productos
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Producto inválido","descripcion":"Prueba de validación","precio":-1,"cantidadStock":1,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Crear producto con precio negativo: 400", () => {
+        client.assert(response.status === 400);
+    });
+%}
+
+### Stock negativo
+PUT {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Producto inválido","descripcion":"Prueba de validación","precio":1,"cantidadStock":-1,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Actualizar producto con stock negativo: 400", () => {
+        client.assert(response.status === 400);
+    });
+%}
+
+### Stock fraccionario
+PUT {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Producto inválido","descripcion":"Prueba de validación","precio":1,"cantidadStock":1.5,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Stock fraccionario: 400", () => {
+        client.assert(response.status === 400);
+    });
+%}
+
+### Precio con demasiados decimales
+PUT {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Producto inválido","descripcion":"Prueba de validación","precio":1.234,"cantidadStock":1,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Precio con tres decimales: 400", () => {
+        client.assert(response.status === 400);
+    });
+%}
+
+### La categoría con productos no se elimina
+DELETE {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labAdmin}}
+
+> {%
+    client.test("Categoría relacionada: 409", () => {
+        client.assert(response.status === 409);
+    });
+%}
+
+### El producto sigue intacto después de los rechazos
+GET {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+
+> {%
+    client.test("Los errores no modifican el producto", () => {
+        client.assert(response.status === 200);
+        client.assert(response.body.nombre === "Producto editado " + client.global.get("labRun"));
+        client.assert(Number(response.body.precio) === 1500.75 && response.body.cantidadStock === 11);
+        client.assert(Number(response.body.categoriaId) === Number(client.global.get("labCatId")));
+    });
+%}
+
+### Precio y stock cero son válidos
+PUT {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+Content-Type: application/json
+
+{"nombre":"Producto {{labRun}}","descripcion":"Prueba con valores cero","precio":0,"cantidadStock":0,"categoriaId":{{labCatId}}}
+
+> {%
+    client.test("Precio y stock cero permitidos", () => {
+        client.assert(response.status === 200);
+        client.assert(Number(response.body.precio) === 0 && response.body.cantidadStock === 0);
+    });
+%}
+
+### 24 - Eliminar producto propio
+< {%
+    for (let i = 1; i <= 23; i++) if (client.global.get("labCheck" + i) !== "ok") throw new Error("Fallo previo: " + i);
+    if (!/^[1-9]\d*$/.test(client.global.get("labProdId"))) throw new Error("ID de producto inválido");
+%}
+DELETE {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+
+> {%
+    client.test("Eliminar producto propio", () => {
+        client.assert(response.status === 204, "Estado recibido: " + response.status);
+        client.global.set("labCheck24", "ok");
+    });
+%}
+
+### 25 - Producto eliminado
+GET {{base}}/productos/{{labProdId}}
+Authorization: Bearer {{labAdmin}}
+
+> {%
+    client.test("Producto eliminado", () => {
+        client.assert(response.status === 404, "Estado recibido: " + response.status);
+        client.global.set("labCheck25", "ok");
+    });
+%}
+
+### 26 - Eliminar categoría propia
+< {%
+    for (let i = 1; i <= 25; i++) if (client.global.get("labCheck" + i) !== "ok") throw new Error("Fallo previo: " + i);
+    if (!/^[1-9]\d*$/.test(client.global.get("labCatId"))) throw new Error("ID de categoría inválido");
+%}
+DELETE {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labAdmin}}
+
+> {%
+    client.test("Eliminar categoría propia", () => {
+        client.assert(response.status === 204, "Estado recibido: " + response.status);
+        client.global.set("labCheck26", "ok");
+    });
+%}
+
+### 27 - Categoría eliminada y suite completa
+GET {{base}}/categorias/{{labCatId}}
+Authorization: Bearer {{labAdmin}}
+
+> {%
+    client.test("Categoría eliminada y suite completa", () => {
+        client.assert(response.status === 404, "Estado recibido: " + response.status);
+        for (let i = 1; i <= 26; i++) if (client.global.get("labCheck" + i) !== "ok") throw new Error("Fallo previo: " + i);
+        client.log("Cuenta de prueba conservada: " + client.global.get("labNewUser"));
+        client.global.set("labCheck27", "ok");
+    });
+%}

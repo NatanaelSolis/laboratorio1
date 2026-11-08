@@ -1,0 +1,269 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #333;
+    background: #f5f5f5;
+}
+
+a {
+    color: #275dad;
+}
+
+h1, h2 {
+    margin-top: 0;
+}
+
+p {
+    line-height: 1.5;
+}
+
+/* Encabezado y navegación */
+.site-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+}
+
+.brand {
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.brand span, small {
+    display: block;
+    font-size: 12px;
+    color: #666;
+}
+
+nav, .session, .actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+nav a {
+    text-decoration: none;
+}
+
+nav a.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.session {
+    margin-left: auto;
+}
+
+main {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+    min-height: 70vh;
+}
+
+.page-heading, .list-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.card {
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+.access {
+    max-width: 440px;
+    margin: 40px auto;
+}
+
+/* Formularios y botones */
+form {
+    display: grid;
+    gap: 16px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+}
+
+input, textarea, select {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    font: inherit;
+}
+
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: 2px solid #275dad;
+    outline-offset: 2px;
+}
+
+input.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched {
+    border-color: #b03030;
+}
+
+button {
+    padding: 10px 16px;
+    border: 1px solid #275dad;
+    border-radius: 3px;
+    background: #275dad;
+    color: white;
+    font: inherit;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.secondary {
+    background: white;
+    color: #333;
+    border-color: #aaa;
+}
+
+button.danger {
+    background: #b03030;
+    border-color: #b03030;
+    color: white;
+}
+
+/* Mensajes y tablas */
+.error, .success, .notice {
+    padding: 12px;
+    border: 1px solid;
+}
+
+.error {
+    color: #b03030;
+    background: #fff3f3;
+}
+
+.success {
+    color: #276a34;
+    background: #eff8ef;
+}
+
+.notice {
+    color: #856600;
+    background: #fff9df;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #eee;
+}
+
+td {
+    max-width: 360px;
+    overflow-wrap: anywhere;
+}
+
+.identifier {
+    font-size: 12px;
+    color: #666;
+}
+
+.empty {
+    padding: 20px;
+    text-align: center;
+}
+
+.confirmation {
+    padding: 12px;
+    border-left: 4px solid #b03030;
+}
+
+.pagination {
+    margin: 20px 0;
+}
+
+footer {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Pantallas pequeñas */
+@media (max-width: 700px) {
+    .site-header, .page-heading {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .session {
+        margin-left: 0;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    main {
+        margin: 15px auto;
+        padding: 0 12px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .access {
+        margin: 20px auto;
+    }
+}

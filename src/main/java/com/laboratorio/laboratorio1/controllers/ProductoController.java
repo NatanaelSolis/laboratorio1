@@ -1,5 +1,7 @@
 package com.laboratorio.laboratorio1.controllers;
 
+import jakarta.validation.Valid;
+
 import com.laboratorio.laboratorio1.dto.ProductoDTO;
 import com.laboratorio.laboratorio1.mappers.ProductoMapper;
 import com.laboratorio.laboratorio1.model.Producto;
@@ -52,7 +54,7 @@ public class ProductoController {
     @PreAuthorize("hasRole('SUPER-ADMIN-ROLE')")
     @PostMapping
     public ResponseEntity<ProductoDTO> create(
-            @RequestBody ProductoDTO productoDTO
+            @Valid @RequestBody ProductoDTO productoDTO
     ) {
         Producto datos = productoMapper.toEntity(productoDTO);
 
@@ -74,7 +76,7 @@ public class ProductoController {
     @PutMapping("/{id}")
     public ResponseEntity<ProductoDTO> update(
             @PathVariable Long id,
-            @RequestBody ProductoDTO productoDTO
+            @Valid @RequestBody ProductoDTO productoDTO
     ) {
         return ResponseEntity.of(
                 productoService.update(

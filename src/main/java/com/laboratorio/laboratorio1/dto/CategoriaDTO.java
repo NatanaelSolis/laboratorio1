@@ -1,8 +1,11 @@
 package com.laboratorio.laboratorio1.dto;
 
-public record CategoriaDTO (
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CategoriaDTO(
         Long id,
-        String nombre,
-        String descripcion
-){
+        @NotBlank @Size(max = 100) String nombre,
+        @NotBlank @Size(max = 255) String descripcion
+) {
 }

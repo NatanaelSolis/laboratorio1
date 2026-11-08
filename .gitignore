@@ -31,3 +31,16 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Angular ###
+node_modules/
+.angular/
+out-tsc/
+npm-debug.log*
+
+### Configuración local ###
+.env
+.env.*
+!.env.example
+http-client.private.env.json
+.http-client/

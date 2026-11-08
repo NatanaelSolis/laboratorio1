@@ -1,5 +1,8 @@
 package com.laboratorio.laboratorio1.controllers;
 
+import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
+
 import com.laboratorio.laboratorio1.model.Categoria;
 import com.laboratorio.laboratorio1.service.CategoriaService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +45,7 @@ public class CategoriaController {
     @PreAuthorize("hasRole('SUPER-ADMIN-ROLE')")
     @PostMapping
     public ResponseEntity<CategoriaDTO> create(
-            @RequestBody CategoriaDTO categoriaDTO
+            @Valid @RequestBody CategoriaDTO categoriaDTO
     ) {
         Categoria categoria = categoriaMapper.toEntity(categoriaDTO);
         Categoria creada = categoriaService.create(categoria);
@@ -68,7 +71,7 @@ public class CategoriaController {
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaDTO> update(
             @PathVariable Long id,
-            @RequestBody CategoriaDTO categoriaDTO
+            @Valid @RequestBody CategoriaDTO categoriaDTO
     ) {
         return ResponseEntity.of(
                 categoriaService.update(
@@ -81,8 +84,13 @@ public class CategoriaController {
     @PreAuthorize("hasRole('SUPER-ADMIN-ROLE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return categoriaService.delete(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+        try {
+            return categoriaService.delete(id)
+                    ? ResponseEntity.noContent().build()
+                    : ResponseEntity.notFound().build();
+        } catch (DataIntegrityViolationException error) {
+            // La base de datos impide borrar una categoría que aún tiene productos.
+            return ResponseEntity.status(409).build();
+        }
     }
 }

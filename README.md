@@ -1,110 +1,47 @@
-# Laboratorio 1 - CRUD Backend
+# Laboratorio 2: inventario de productos y categorías
 
-CRUD de categorías y productos con Spring Boot, Spring Data JPA, MySQL, MapStruct y autenticación JWT mediante Keycloak.
+Responsable del proyecto: **Nathanael Solis**.
 
-Referencia utilizada: https://github.com/ginocenfo/Persistencia-proyecto-3-c3
+Aplicación Angular 17 con una API Spring Boot, PostgreSQL y autenticación con Keycloak. Permite consultar productos y categorías. El administrador también puede crearlos, editarlos, eliminarlos y consultar usuarios. Las cuentas nuevas reciben el rol USER.
+
+Referencia del backend original: https://github.com/ginocenfo/Persistencia-proyecto-3-c3.
 
 ## Requisitos
 
-- JDK 25 configurado en JAVA_HOME.
-- Docker Desktop en ejecución.
-- Postman.
+- IntelliJ IDEA con soporte para Java y Node.js.
+- JDK 25, Node.js 20 y npm.
+- Docker Desktop iniciado.
 
-Ejecutar los siguientes comandos desde la raíz del proyecto, en PowerShell.
+## Ejecutar desde IntelliJ IDEA
 
-## Primera ejecución
+1. Abrir la carpeta que contiene `pom.xml` y `package.json`.
+2. Seleccionar JDK 25 como SDK del proyecto y recargar Maven.
+3. Abrir `docker/compose.yaml` y ejecutar todos sus servicios con el icono de Docker Compose. Esperar a que PostgreSQL y Keycloak estén disponibles.
+4. Ejecutar `Laboratorio1Application` con el botón Run.
+5. Abrir `package.json`, instalar las dependencias npm y ejecutar el script `start`.
+6. Abrir http://localhost:4200.
 
-### 1. Iniciar MySQL
+La API utiliza http://localhost:8080 y Keycloak http://localhost:8180. PostgreSQL del inventario está en `localhost:5433`. Los servicios se publican solo en la computadora local y los datos se conservan en volúmenes de Docker.
 
-```powershell
-docker compose -f docker/compose.yaml up -d db
-docker compose -f docker/compose.yaml logs -f db
-```
+Para compilar el frontend, ejecutar el script `build` de `package.json`. Para compilar y probar el backend, ejecutar `package` desde el panel Maven. Con los servicios iniciados, abrir `pruebas.http` y seleccionar **Run All Requests**. Las pruebas crean datos propios, eliminan su producto y categoría al terminar y conservan la cuenta registrada.
 
-Esperar el mensaje `ready for connections` y pulsar Ctrl + C para salir de los registros. El contenedor seguirá funcionando.
+## Cuentas de prueba
 
-### 2. Preparar la base de Keycloak
+| Rol | Usuario | Contraseña |
+| --- | --- | --- |
+| SUPER-ADMIN-ROLE | admin | AdminLab123! |
+| USER | usuario | UsuarioLab123! |
 
-```powershell
-docker compose -f docker/compose.yaml exec db mysql -u root -p
-```
+Estas credenciales son para el laboratorio local. Las cuentas de la aplicación pertenecen al realm `laboratorio1`. La consola de Keycloak usa `admin` / `admin` en el realm `master`.
 
-Introducir la contraseña de `MYSQL_ROOT_PASSWORD` definida en `docker/compose.yaml`.
+## Organización
 
-Dentro de MySQL, ejecutar:
-
-```sql
-CREATE DATABASE IF NOT EXISTS keycloak
-CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-CREATE USER IF NOT EXISTS 'keycloak_app'@'%'
-IDENTIFIED BY 'KeycloakDb123!';
-
-GRANT ALL PRIVILEGES ON keycloak.* TO 'keycloak_app'@'%';
-
-EXIT;
-```
-
-### 3. Iniciar Keycloak
-
-```powershell
-docker compose -f docker/compose.yaml up -d keycloak
-docker compose -f docker/compose.yaml logs -f keycloak
-```
-
-Esperar a que termine de iniciar. Después, pulsar Ctrl + C para salir de los registros.
-
-Se importa el realm `laboratorio1` con los usuarios y roles de prueba.
-
-### 4. Iniciar el backend
-
-Comprobar que Maven utiliza Java 25:
-
-```powershell
-.\mvnw.cmd -v
-```
-
-Ejecutar la aplicación:
-
-```powershell
-.\mvnw.cmd clean spring-boot:run
-```
-
-Mantener esta terminal abierta durante las pruebas.
-
-## Servicios
-
-- API: http://localhost:8080
-- Keycloak: http://localhost:8180
-- MySQL: localhost:3307
-- Realm: `laboratorio1`
-- Client ID: `laboratorio1-api`
-- Origen CORS permitido: `http://localhost:4200`
-
-## Usuarios locales de prueba
-
-| Usuario | Contraseña | Rol |
-|---|---|---|
-| admin | AdminLab123! | SUPER-ADMIN-ROLE |
-| usuario | UsuarioLab123! | USER |
-
-Ambos usuarios pueden consultar. Solo el administrador puede crear, actualizar y eliminar categorías y productos.
-
-## Colección de Postman
-
-Importar `Laboratorio1.postman_collection.json`.
-
-Ejecutar las carpetas en este orden:
-
-1. 00 Autenticacion
-2. 01 Categorias
-3. 02 Productos
-4. 03 Permisos
-5. 04 Borrado
-6. 05 CORS
-
-Los scripts guardan automáticamente los tokens y los IDs en variables de la colección. No se necesita un environment.
-
-Las pruebas de permisos esperan 403. Los borrados autorizados esperan 204; primero se elimina el producto y después la categoría.
-
-La aplicación no precarga categorías. La colección crea sus registros de prueba.
+- `src/app/acceso.ts`: inicio de sesión y registro.
+- `src/app/core.ts`: sesión, permisos de navegación, token HTTP y mensajes de error.
+- `src/app/catalogo.ts`: listas y formulario compartido para productos y categorías.
+- `src/app/app.ts`: menú, rutas y consulta de usuarios.
+- `src/main.ts`, `src/index.html` y `src/styles.css`: inicio y presentación de Angular.
+- `src/main/java`: controladores, servicios, entidades, repositorios y seguridad de la API.
+- `src/main/resources/application.properties`: conexión a PostgreSQL y Keycloak.
+- `docker`: servicios locales y configuración inicial de Keycloak.
+- `pruebas.http` y `src/test`: comprobaciones de la API y del backend.
