@@ -1,6 +1,6 @@
 # Laboratorio 2: inventario de productos y categorías
 
-Responsable del proyecto: **Nathanael Solis**.
+Responsable del proyecto: **Natanael Solis**.
 
 Aplicación Angular 17 con una API Spring Boot, PostgreSQL y autenticación con Keycloak. Permite consultar productos y categorías. El administrador también puede crearlos, editarlos, eliminarlos y consultar usuarios. Las cuentas nuevas reciben el rol USER.
 
